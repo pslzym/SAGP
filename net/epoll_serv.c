@@ -147,6 +147,10 @@ int main()
                 //close the fd //end of file or read all data.
                 if (flag){
                     printf("closed the connection fd : %d.\n", events[i].data.fd);
+                    if(epoll_ctl(epoll_fd, EPOLL_CTL_DEL, events[i].data.fd, NULL) == -1){
+                        perror("epoll_ctl del");
+                        exit(1);
+                    }
                     close(events[i].data.fd);
                 }
 
