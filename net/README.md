@@ -16,7 +16,7 @@ https://zh.wikipedia.org/wiki/Epoll
 使用方法
 https://zh.wikipedia.org/wiki/Select_(Unix)
 
-void FD_CLR(int fd, fd_set *set);
-int  FD_ISSET(int fd, fd_set *set);
-void FD_SET(int fd, fd_set *set);
-void FD_ZERO(fd_set *set);
+* void FD_CLR(int fd, fd_set *set);
+* int  FD_ISSET(int fd, fd_set *set);
+* void FD_SET(int fd, fd_set *set);
+* void FD_ZERO(fd_set *set);
