@@ -53,7 +53,6 @@ int main()
     FD_SET(serv_fd, &allset);
 
     int nread, i, connfd;
-    FILE * fd;
     char buf[RBUF_SIZE];
 
     int max_fd = serv_fd;
@@ -97,10 +96,10 @@ int main()
         }
 
         if (FD_ISSET(STDIN_FILENO, &rset)){
-            if(NULL == fgets(buf, RBUF_SIZE, fd)){
+            if(NULL == fgets(buf, RBUF_SIZE, stdin)){
                 perror("fgets");
             } else {
-                fputs(buf, fd);
+                fputs(buf, stdout);
             }
             if (--nread <= 0)
                 continue;
