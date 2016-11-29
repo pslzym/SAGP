@@ -64,9 +64,6 @@ int main()
 
     while(1){
         int nfds, i;
-        struct sockaddr_in client_addr;
-        int client_fd;
-        socklen_t len = sizeof(client_fd);
         //timeout = -1 is block
         printf("epoll wait.\n");
         if ((nfds = epoll_wait(epoll_fd, events, MAX_EVENTS, -1)) == -1){
@@ -89,23 +86,30 @@ int main()
                 continue;
             } else if (events[i].data.fd == serv_fd){
                 printf("nfds is serv_fd.\n");
-                client_fd = accept(serv_fd, (struct sockaddr *)&client_addr, &len);
-                if (client_fd == -1){
-                    //some can again error or EINTR signal
-                    if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR){
-                        continue;
-                    } else {
-                        perror("accept");
-                        continue;
+                while(1){
+                    struct sockaddr_in client_addr;
+                    int client_fd;
+                    socklen_t len = sizeof(client_fd);
+                    client_fd = accept(serv_fd, (struct sockaddr *)&client_addr, &len);
+                    if (client_fd == -1){
+                        //some can again error or EINTR signal
+                        if (errno == EAGAIN || errno == EWOULDBLOCK){
+                            break;
+                        } else if (errno == EINTR){
+                            continue;
+                        } else {
+                            perror("accept");
+                            continue;
+                        }
                     }
-                }
-                //set the client_fd into epoll_fd
-                setnonblocking(client_fd);
-                ev.data.fd = client_fd;
-                ev.events = EPOLLIN | EPOLLET;
-                if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &ev) == -1){
-                    perror("epoll_ctl");
-                    exit(1);
+                    //set the client_fd into epoll_fd
+                    setnonblocking(client_fd);
+                    ev.data.fd = client_fd;
+                    ev.events = EPOLLIN | EPOLLET;
+                    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &ev) == -1){
+                        perror("epoll_ctl");
+                        exit(1);
+                    }
                 }
             } else {
                 printf("nfds is tcp connect.\n");
@@ -114,18 +118,25 @@ int main()
                 int flag = 0;
                 while(1){
                     count = read(events[i].data.fd, buf, sizeof buf);
-                    if (count == -1 && errno == EINTR){
-                        continue;
-                    }
-                    else if (count == -1 && errno == EAGAIN){
-                        perror("read");
-                        flag = 1;
-                        break;
+                    if (count == -1){
+                        if (errno == EINTR)
+                        {
+                            continue;
+                        } else if (errno == EAGAIN || errno == EWOULDBLOCK) //read end
+                        {
+                            break;
+                        } else {
+                            flag = 1;
+                            break;
+                        }
                     } else if (count == 0){
                         flag = 1;
                         break;
-                    } else {
+                    } else if (count < sizeof(buf) && count > 0){
                         break;
+                    } else { // just continue this place is error.
+                        printf("Read data len large buf len.\nRead Data is error.\n");
+                        continue;
                     }
                 }
                 //write data to stdout
@@ -135,10 +146,12 @@ int main()
                         if (wn == -1){
                             if (errno == EINTR){
                                 continue;
-                            } else {
-                                perror("write");
-                                exit(0);
+                            } else if (errno == EAGAIN || errno == EWOULDBLOCK){
+                                break;
                             }
+                        } else if (wn < count){ // 
+                            printf("Write Data len is not equal read data.\nWrite data is error.\n");
+                            continue;
                         } else {
                             break;
                         }
