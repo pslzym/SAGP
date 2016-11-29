@@ -22,8 +22,8 @@ https://zh.wikipedia.org/wiki/Select_(Unix)
 * void FD_ZERO(fd_set *set);
 
 ##I/O模型
-* 阻塞式IO 需要调用系统函数进行 kernal -> usr
-* 非阻塞式 需要调用系统函数进行 kernal -> usr
-* IO复用（select/poll） 需要调用系统函数进行 kernal -> usr
-* 信号驱动式IO(SIGIO) 需要调用系统函数进行 kernal -> usr
-* 异步IO（aio_系列函数）不需要kernal -> usr 相关接口已经准备OK
+* 阻塞式IO 需要调用系统函数进行 kernal -> usr数据copy
+* 非阻塞式 需要调用系统函数进行 kernal -> usr数据copy
+* IO复用（select/poll） 需要调用系统函数进行 kernal -> usr数据copy
+* 信号驱动式IO(SIGIO) 需要调用系统函数进行 kernal -> usr数据copy
+* 异步IO（aio_系列函数）不需要kernal -> usr数据copy 相关接口已经准备OK
