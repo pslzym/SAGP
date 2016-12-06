@@ -1,20 +1,18 @@
-/*
- * 友元函数没有 this 指针，因为友元不是类的成员。只有成员函数才有 this 指针。+
- *
- */
 
 #include <iostream>
 using namespace std;
 
 class Box
 {
-    public : 
+    public:
+        static int objectCount;
         Box(double l = 2.0, double b=2.0, double h = 2.0)
         {
             cout << "Constructor called." << endl;
             length = l;
             breadth = b;
             height = h;
+            objectCount++;
         }
 
         double Volume()
@@ -26,33 +24,29 @@ class Box
         {
             return this->Volume() > box.Volume();
         }
-        static getCount()
+
+        static int getCount()
         {
             return objectCount;
         }
-
     private:
         double length;
         double breadth;
         double height;
+
 };
+
+//需要加上 类型的定义 int
+int Box::objectCount = 0;
 
 int main()
 {
     Box Box1(3.3, 1.2, 1.5);
     Box Box2(8.5, 6.0, 2.0);
 
-    Box *ptrBox = &Box1;
-
-    cout << "ptrBox : " << ptrBox->Volume() << endl;
-
-    if (Box1.compare(Box2))
-    {
-        cout << "Box2 is smaller than Box1" << endl;
-    } else {
-        cout << "Box1 is smaller than Box2" << endl;
-    }
+    cout << "Total object : " << Box::objectCount << endl;
 
     cout << "getCount : " << Box::getCount() << endl;
 
+    return 0;
 }
